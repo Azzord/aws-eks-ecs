@@ -109,22 +109,46 @@ const passwordMismatch = computed(() => {
   return mode.value === 'register' && password.value !== confirmPassword.value
 })
 
-const handleSubmit = () => {
-  if (mode.value === 'register' && passwordMismatch.value) {
-    alert('Les mots de passe ne correspondent pas.')
-    return
-  }
-
+const handleSubmit = async () => {
   if (!email.value || !password.value) {
     alert('Veuillez remplir tous les champs.')
     return
   }
 
-  alert(
-    mode.value === 'login'
-      ? `Tentative de connexion pour ${email.value}`
-      : `Tentative d'inscription pour ${email.value}`
-  )
+  if (mode.value === 'register') {
+    if (passwordMismatch.value) {
+      alert('Les mots de passe ne correspondent pas.')
+      return
+    }
+    alert("L'inscription n'est pas encore implémentée côté backend.")
+    return
+  }
+
+  // ➡ Connexion--
+  try {
+    const response = await fetch('http://localhost:8000/api/v1/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value
+      })
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      alert('Erreur : ' + error.detail)
+      return
+    }
+
+    const data = await response.json()
+    alert(`✅ ${data.message}\nToken: ${data.token}`)
+  } catch (err) {
+    alert('Erreur de connexion au serveur.')
+    console.error(err)
+  }
 }
 
 const handleReset = () => {
@@ -133,3 +157,4 @@ const handleReset = () => {
   confirmPassword.value = ''
 }
 </script>
+
