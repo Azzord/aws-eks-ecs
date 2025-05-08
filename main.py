@@ -1,21 +1,27 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 
 app = FastAPI()
 
-# Schéma d'entrée pour la connexion
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"],
+)
+
+
 class AuthRequest(BaseModel):
     email: EmailStr
     password: str
 
-# Route POST pour la connexion
 @app.post("/api/v1/auth")
 async def login(auth: AuthRequest):
-    # Simulation d'une tentative de connexion
     print(f"Tentative de connexion avec: {auth.email} / {auth.password}")
-
-    # Exemple de réponse (tu peux ajouter de la logique plus tard)
     if auth.email == "admin@example.com" and auth.password == "admin":
-        return {"message": "Connexion réussie", "token": "fake-jwt-token"}
+        return {"message": "Connexion réussie", "token": "fake-js-token"}
     else:
-        raise HTTPException(status_code=200, detail="Email ou mot de passe incorrect")
+        raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
